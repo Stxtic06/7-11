@@ -1,0 +1,95 @@
+
+import java.util.Scanner;
+
+public class ReceiptGenerator {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        String storeName    = "Java Mart";
+        String storeAddress = "123 Code Street, Newark, NJ 07102";
+        String cashier      = "Alex";
+
+        System.out.print("How many products are you purchasing? ");
+        int numProducts = scanner.nextInt();
+        scanner.nextLine();
+
+        String[] productNames      = new String[numProducts];
+        int[]    productQuantities  = new int[numProducts];
+        double[] productPrices     = new double[numProducts];
+
+        for (int i = 0; i < numProducts; i++) {
+            System.out.print("Enter product name #" + (i + 1) + ": ");
+            productNames[i] = scanner.nextLine();
+
+            System.out.print("Enter quantity for " + productNames[i] + ": ");
+            productQuantities[i] = scanner.nextInt();
+
+            System.out.print("Enter unit price for " + productNames[i] + " ($): ");
+            productPrices[i] = scanner.nextDouble();
+            scanner.nextLine();
+        }
+
+        System.out.print("Enter tax rate (e.g. 8.5 for 8.5%): ");
+        double taxRate = scanner.nextDouble();
+
+        System.out.print("Enter discount percentage (e.g. 10 for 10%, or 0 for none): ");
+        double discountRate = scanner.nextDouble();
+
+        double subtotal = 0.0;
+        for (int i = 0; i < numProducts; i++) {
+            subtotal += productQuantities[i] * productPrices[i];
+        }
+
+        double discountAmount = subtotal * (discountRate / 100.0);
+        double afterDiscount  = subtotal - discountAmount;
+        double taxAmount      = afterDiscount * (taxRate / 100.0);
+        double total          = afterDiscount + taxAmount;
+
+        String divider     = "========================================";
+        String thinDivider = "----------------------------------------";
+
+        System.out.println("\n" + divider);
+        System.out.printf("%s%n", centerText(storeName, 40));
+        System.out.printf("%s%n", centerText(storeAddress, 40));
+        System.out.printf("%s%n", centerText("Cashier: " + cashier, 40));
+        System.out.println(divider);
+
+        System.out.printf("%-18s %5s %7s %8s%n", "ITEM", "QTY", "PRICE", "TOTAL");
+        System.out.println(thinDivider);
+
+        for (int i = 0; i < numProducts; i++) {
+            double lineTotal = productQuantities[i] * productPrices[i];
+            System.out.printf("%-18s %5d %7.2f %8.2f%n",
+                    productNames[i],
+                    productQuantities[i],
+                    productPrices[i],
+                    lineTotal);
+        }
+
+        System.out.println(thinDivider);
+        System.out.printf("%-30s %8.2f%n", "Subtotal:", subtotal);
+
+        if (discountRate > 0) {
+            System.out.printf("%-25s (%4.1f%%) %8.2f%n", "Discount:", discountRate, -discountAmount);
+        }
+
+        System.out.printf("%-25s (%4.1f%%) %8.2f%n", "Tax:", taxRate, taxAmount);
+        System.out.println(divider);
+        System.out.printf("%-30s %8.2f%n", "TOTAL:", total);
+        System.out.println(divider);
+
+        System.out.printf("%n%s%n", centerText("Thank you for shopping at " + storeName + "!", 40));
+        System.out.printf("%s%n%n", centerText("Please come again :)", 40));
+
+        scanner.close();
+    }
+
+    public static String centerText(String text, int width) {
+        if (text.length() >= width) return text;
+        int padding = (width - text.length()) / 2;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < padding; i++) sb.append(" ");
+        sb.append(text);
+        return sb.toString();
+    }
+}
