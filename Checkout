@@ -1,0 +1,108 @@
+import java.util.List;
+import java.util.Scanner;
+
+public class Checkout {
+
+    private final SaleComputation saleComputation;
+    private final Payment payment;
+    private final List<CartItem> cart;
+    private final Scanner scanner;
+
+    public Checkout(SaleComputation saleComputation, Payment payment, List<CartItem> cart) {
+        this.saleComputation = saleComputation;
+        this.payment = payment;
+        this.cart = cart;
+        this.scanner = new Scanner(System.in);
+    }
+
+    public boolean processCheckout() {
+        double totalPrice = saleComputation.calculateTotal(cart);
+        System.out.printf("%nOrder Total: $%.2f%n", totalPrice);
+        System.out.println("─".repeat(40));
+
+        if (!confirmPurchase()) {
+            System.out.println("Checkout cancelled.");
+            return false;
+        }
+
+        System.out.println("\nVerifying stock availability...");
+        if (!saleComputation.verifyStockBeforeCheckout(cart)) {
+            System.out.println("Error: One or more items in your cart are out of stock or have insufficient quantity.");
+            return false;
+        }
+        System.out.println("Stock verified successfully.");
+
+        ShippingInfo shippingInfo = collectShippingInfo();
+
+        String cardZipCode = payment.getCardZipCode();
+        if (!validateZipCode(shippingInfo.getZipCode(), cardZipCode)) {
+            System.out.println("Error: The zip code you entered does not match your debit card's billing zip code.");
+            return false;
+        }
+
+        System.out.println("\nProcessing payment...");
+        boolean paymentSuccess = payment.processPayment(totalPrice, shippingInfo);
+
+        if (!paymentSuccess) {
+            System.out.println("Error: Payment failed. Please check your payment details and try again.");
+            return false;
+        }
+
+        System.out.println("Payment successful! Updating inventory...");
+        for (CartItem item : cart) {
+            item.getProduct().updateStock(item.getQuantity());
+        }
+
+        System.out.println("\nThank you for your purchase, " + shippingInfo.getName() + "!");
+        System.out.printf("Your order will be shipped to:%n  %s%n  %s%n",
+                shippingInfo.getAddress(), shippingInfo.getZipCode());
+
+        return true;
+    }
+
+    private boolean confirmPurchase() {
+        System.out.print("Do you want to proceed with this purchase? (yes/no): ");
+        String response = scanner.nextLine().trim().toLowerCase();
+        return response.equals("yes") || response.equals("y");
+    }
+
+    private ShippingInfo collectShippingInfo() {
+        System.out.println("\nShipping Information");
+        System.out.println("─".repeat(40));
+
+        System.out.print("Full Name: ");
+        String name = scanner.nextLine().trim();
+
+        System.out.print("Street Address: ");
+        String address = scanner.nextLine().trim();
+
+        System.out.print("Zip Code: ");
+        String zipCode = scanner.nextLine().trim();
+
+        return new ShippingInfo(name, address, zipCode);
+    }
+
+    private boolean validateZipCode(String addressZipCode, String cardZipCode) {
+        if (addressZipCode == null || cardZipCode == null) {
+            return false;
+        }
+        return addressZipCode.trim().equals(cardZipCode.trim());
+    }
+
+    public static class ShippingInfo {
+
+        private final String name;
+        private final String address;
+        private final String zipCode;
+
+        public ShippingInfo(String name, String address, String zipCode) {
+            this.name    = name;
+            this.address = address;
+            this.zipCode = zipCode;
+        }
+
+        public String getName()    { return name; }
+        public String getAddress() { return address; }
+        public String getZipCode() { return zipCode; }
+    }
+}
