@@ -1,0 +1,48 @@
+InsufficientFundsException
+public class InsufficientFundsException extends Exception {
+
+    private final double amountRequired;
+    private final double amountAvailable;
+
+    public InsufficientFundsException(double amountRequired, double amountAvailable) {
+        super(String.format("Insufficient funds: required $%.2f but only $%.2f available.",
+                amountRequired, amountAvailable));
+        this.amountRequired  = amountRequired;
+        this.amountAvailable = amountAvailable;
+    }
+
+    public double getAmountRequired()  { return amountRequired; }
+    public double getAmountAvailable() { return amountAvailable; }
+}
+
+Invalidzipcodeexception
+
+public class InvalidZipCodeException extends Exception {
+
+    private final String enteredZipCode;
+    private final String expectedZipCode;
+
+    public InvalidZipCodeException(String enteredZipCode, String expectedZipCode) {
+        super(String.format("Invalid zip code: entered '%s' does not match card billing zip code '%s'.",
+                enteredZipCode, expectedZipCode));
+        this.enteredZipCode  = enteredZipCode;
+        this.expectedZipCode = expectedZipCode;
+    }
+
+    public String getEnteredZipCode()  { return enteredZipCode; }
+    public String getExpectedZipCode() { return expectedZipCode; }
+}
+
+ProductNotFoundException
+
+public class ProductNotFoundException extends Exception {
+
+    private final String productId;
+
+    public ProductNotFoundException(String productId) {
+        super(String.format("Product not found: no product exists with ID '%s'.", productId));
+        this.productId = productId;
+    }
+
+    public String getProductId() { return productId; }
+}
